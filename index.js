@@ -52,6 +52,17 @@ client.on('message', message => {
       eDescription = "Commands available:\n```help ping```";
       break;
       
+    case 'coinflip':
+    case 'flipcoin':
+    case 'coin':
+	  sendEmbed = true;
+	  eTitle = 'Flipped a coin!';
+	  if (Math.random() <= 0.5) {
+		eDescription = 'Heads!';
+	  } else {
+		eDescription = 'Tails!';
+	  }
+      
     default:
       sendEmbed = true;
       eTitle = "Invalid Command.";
@@ -72,7 +83,8 @@ client.on('message', message => {
     .setThumbnail(eThumbnail)
     .setTimestamp();
     message.channel.send(embed);
-  }  
+  } 
+   
 });
 
 client.login(secrets.token); 
