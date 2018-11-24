@@ -55,13 +55,14 @@ client.on('message', message => {
     case 'coinflip':
     case 'flipcoin':
     case 'coin':
-	  sendEmbed = true;
-	  eTitle = 'Flipped a coin!';
-	  if (Math.random() <= 0.5) {
-		eDescription = 'Heads!';
-	  } else {
-		eDescription = 'Tails!';
-	  }
+      sendEmbed = true;
+      eTitle = 'Flipped a coin!';
+      if (Math.random() <= 0.5) {
+        eDescription = 'Heads!';
+      } else {
+	eDescription = 'Tails!';
+      }
+      break;
       
     default:
       sendEmbed = true;
