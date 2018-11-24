@@ -1,0 +1,8 @@
+@font-face {
+    font-family: "SFCompactDisplay-Medium";
+    src: url("./assets/SFCompactDisplay-Medium.otf");
+}
+
+body {
+    font-family: "SFCompactDisplay-Medium";
+}
