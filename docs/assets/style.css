@@ -5,5 +5,25 @@
 
 body {
     font-family: "SFCompactDisplay-Medium";
+    margin: 100px;
+    background-image: linear-gradient(to bottom right, red, yellow);
 }
 
+.inviteBtn {
+  float: right;
+  background-color: black;
+  color: white;
+  text-decoration: none;
+  font-size: 29px;
+  border: none;
+}
+
+.minihr {
+  width: 25%;
+}
+
+h4 {
+  font-weight: bolder;
+  margin-bottom: -10px;
+  font-size: 20px;
+}
