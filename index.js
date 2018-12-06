@@ -1,91 +1,91 @@
 
 /*
-
-  ChigBot 0.1 BETA NOT WORKING VERSION
-  made by Eliot Chignell (@EliotChignell on git and twitter)
-  with the help of anidiots.guide and discordjs.guide
-
+  chigbot 0.0 BETA DEV VERSION NOTHING WORKS
+  Produced by Eliot Chignell: 
+    Twitter - @EliotChignell
+    Email - chignelleliot@gmail.com
 */
 
-const fs = require('fs');
+const secrets = require("./secrets.json");
+
 const Discord = require('discord.js');
-const prefix = 'ch';
-
-const secrets = require('./secrets.json');
-
-var otherVars = {
-	eColor: null,
-	eTitle: "",
-	eAuthor: null,
-	eDescription: "",
-	eFooter: "",
-	eImage: null,
-	eThumbnail: null,
-	embed: null,
-	sendEmbed: false
-};
-
-/*
-var eColor, eTitle, eAuthor, eDescription, eFooter, eImage, eThumbnail, embed;
-var sendEmbed = false; 
-*/
-
 const client = new Discord.Client();
-client.commands = new Discord.Collection();
 
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
-for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	client.commands.set(command.name, command);
-}
+var eColor, eTitle, eAuthor, eDescription, eFooter, eImage, eThumbnail, embed;
+var sendEmbed = false;
 
 client.once('ready', () => {
-	console.log('Ready!');
+    console.log('Ready!');
 });
+
+/*
+Copy this
+
+sendEmbed = true;
+eTitle = "";
+eDescription = "";
+eImage = "";
+eThumbnail = "";
+
+*/
 
 client.on('message', message => {
+  
+  if (!message.content.startsWith('ch')) return;
+  
+  let command = message.content.split(' ');
+  const eColor = message.guild.members.get('442184461405126656').displayHexColor;
+  console.log("("+message.author.username+") "+message.content);
 
-	exports.data = {otherVars, client};
-	if (!message.content.startsWith(prefix) || message.author.bot) return;
+  switch(command[1].toLowerCase()) {
+    case 'ping':
+	    sendEmbed = true;
+      eTitle = "";
+      eDescription = "**Pong!** :ping_pong:\nPing: "+client.ping+"ms";
+      eImage = "";
+      eThumbnail = "";
+      break;
+      
+    case 'help':
+      sendEmbed = true;
+      eTitle = "Help";
+      eDescription = "Commands available:\n```help ping```";
+      break;
+      
+    case 'coinflip':
+    case 'flipcoin':
+    case 'coin':
+      sendEmbed = true;
+      eTitle = 'Flipped a coin!';
+      if (Math.random() <= 0.5) {
+        eDescription = 'Heads!';
+      } else {
+	eDescription = 'Tails!';
+      }
+      break;
+      
+    default:
+      sendEmbed = true;
+      eTitle = "Invalid Command.";
+      eDescription = "Please use `ch help` to find out the available commands.";
+      eImage = "";
+      eThumbnail = "";
+      break;
+  }
 
-	const args = message.content.slice(prefix.length+1).split(/ +/);
-	const commandName = args.shift().toLowerCase();
-
-	otherVars.eColor = message.guild.members.get('442184461405126656').displayHexColor;
-
-	// Command Logging
-	console.log("("+message.author.username+") "+message.content);
-
-	// if (!client.commands.has(commandName)) return;
-
-	const command = client.commands.get(commandName)
-		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
-
-	if (!command) return;
-
-	try {
-		command.execute(message, args);
-		if (otherVars.sendEmbed) {
-			otherVars.embed = new Discord.RichEmbed()
-				.setTitle(otherVars.eTitle)
-				.setColor(otherVars.eColor)
-				.setAuthor("chigbot",client.user.displayAvatarURL)
-				.setDescription(otherVars.eDescription)
-				.setFooter('ch [command]')
-				.setImage(otherVars.eImage)
-				.setThumbnail(otherVars.eThumbnail)
-				.setTimestamp();
-			message.channel.send(otherVars.embed);
-		}
-	}
-	catch (error) {
-		console.error(error);
-		message.reply('there was an error trying to execute that command!');
-	}
-
+  if (sendEmbed) {
+	let embed = new Discord.RichEmbed()
+    .setTitle(eTitle)
+    .setAuthor("chigbot",client.user.displayAvatarURL)
+    .setColor(eColor)
+    .setDescription(eDescription)
+    .setFooter("ch [command]")
+    .setImage(eImage)
+    .setThumbnail(eThumbnail)
+    .setTimestamp();
+    message.channel.send(embed);
+  } 
+   
 });
 
-exports.data = {otherVars, client};
-
-client.login(secrets.token);
+client.login(secrets.token); 
