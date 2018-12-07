@@ -63,7 +63,13 @@ client.on('message', message => {
 	eDescription = 'Tails!';
       }
       break;
-      
+    
+    case 'info':
+      sendEmbed = true;
+      eTitle = 'Information about this bot';
+      eDescription = "The bot's GitHub page: [click here](https://github.com/EliotChignell/ChigBot)\nMy (the developer's) website: [click here](https://eliotchignell.github.io)\nThe bot's website: [click here](https://eliotchignell.github.io/ChigBot)";
+      break;
+  
     default:
       sendEmbed = true;
       eTitle = "Invalid Command.";

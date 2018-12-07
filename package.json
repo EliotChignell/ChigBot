@@ -1,0 +1,34 @@
+{
+  "name": "chigbot",
+  "version": "1.0.0",
+  "description": "A multi-purpose discord.js bot.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "discord.js": "^11.4.2",
+    "nodemon": "^1.18.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EliotChignell/ChigBot.git"
+  },
+  "keywords": [
+    "discord.js",
+    "discord",
+    "bot",
+    "nodejs",
+    "js"
+  ],
+  "author": "Eliot Chignell",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EliotChignell/ChigBot/issues"
+  },
+  "homepage": "https://github.com/EliotChignell/ChigBot#readme"
+}
