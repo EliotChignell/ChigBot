@@ -54,8 +54,11 @@ client.on('message', message => {
   if (!message.content.startsWith('ch')) return;
   
   let command = message.content.split(' ');
+  let eCommand = message.content.split(' ');
   const eColor = message.guild.members.get('442184461405126656').displayHexColor;
   console.log("("+message.author.username+") "+message.content);
+
+  finalString = '';
 
   switch(command[1].toLowerCase()) {
     case 'ping':
@@ -91,16 +94,17 @@ client.on('message', message => {
       break;
     
     case 'encrypt':
+
+      input = '';
       sendEmbed = false;
       if (!message.channel.type == "dm") return message.reply("You cannot encrypt/decrypt in a server/group dm!\nPlease DM me to encrypt/decrypt a message!");
       sendEmbed = true;
 
       for (var i=2;i<command.length;i++) {
         input += command[i];
-        if (i<command.length) input += ' ';
+        if (i<command.length-1) input += ' ';
       }
 
-      finalString = '';
       key = '';
       shuffledCharacters = shuffle(oCharacters);
       input.split('');
@@ -113,14 +117,51 @@ client.on('message', message => {
           }
       }
 
-      let key = shuffledCharacters.join('');
+      key = shuffledCharacters.join('');
 
       eTitle = "Encryption Tool";
-      eDescription = "```Encrypted Text:\n"+finalString+"\nKey:\n"+key+"```";
+      eDescription = "Encrypted Text:\n```"+finalString+"```\nKey:\n```"+key+"```";
       
       break;
     
     case 'decrypt':
+      
+      key = command;
+      key.splice(0,2);
+      key.length = 2;
+      key = key.join(' ');
+
+      input = eCommand;
+      input.shift();
+      console.log(input);
+      input.shift();
+      console.log(input);
+      input.shift();
+      console.log(input);
+      input.shift();
+      console.log(input);
+      input = input.join(' ');
+      console.log('Key: '+key);
+      console.log('Input: '+input);
+
+      /*
+      key.splice(0,2);
+      key.length = 2;
+      key.join(' ').toString();
+      console.log(key);
+      */
+
+      for (var i=0;i<input.length;i++) {
+          for (var j=0;j<key.length;j++) {
+              if (input[i] == key[j]) {
+                  finalString += characters[j];
+              }
+          }
+      }
+
+      sendEmbed = true;
+      eTitle = 'Decryption Tool';
+      eDescription = 'Decrypted Text:\n```'+finalString+'```';
       break;
   
     default:
