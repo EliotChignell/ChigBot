@@ -101,6 +101,7 @@ client.on('message', message => {
       }
 
       finalString = '';
+      key = '';
       shuffledCharacters = shuffle(oCharacters);
       input.split('');
 
