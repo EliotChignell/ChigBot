@@ -14,6 +14,26 @@ const client = new Discord.Client();
 var eColor, eTitle, eAuthor, eDescription, eFooter, eImage, eThumbnail, embed;
 var sendEmbed = false;
 
+// Encryption Variables and Functions
+let input = '';
+let key = '';
+let finalString = '';
+const characters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',' '];
+const oCharacters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',' '];
+let shuffledCharacters = [];
+
+function shuffle(a) {
+  let b = a;
+  var j, x, i;
+  for (i = b.length - 1; i > 0; i--) {
+      j = Math.floor(Math.random() * (i + 1));
+      x = b[i];
+      b[i] = b[j];
+      b[j] = x;
+  }
+  return b;
+}
+
 client.once('ready', () => {
     console.log('Ready!');
 });
@@ -68,6 +88,38 @@ client.on('message', message => {
       sendEmbed = true;
       eTitle = 'Information about this bot';
       eDescription = "The bot's GitHub page: [click here](https://github.com/EliotChignell/ChigBot)\nMy (the developer's) website: [click here](https://eliotchignell.github.io)\nThe bot's website: [click here](https://eliotchignell.github.io/ChigBot)";
+      break;
+    
+    case 'encrypt':
+      sendEmbed = false;
+      if (!message.channel.type == "dm") return message.reply("You cannot encrypt/decrypt in a server/group dm!\nPlease DM me to encrypt/decrypt a message!");
+      sendEmbed = true;
+
+      for (var i=2;i<command.length;i++) {
+        input += command[i];
+        if (i<command.length) input += ' ';
+      }
+
+      finalString = '';
+      shuffledCharacters = shuffle(oCharacters);
+      input.split('');
+
+      for (var i=0;i<input.length;i++) {
+          for (var j=0;j<characters.length;j++) {
+              if (input[i] == characters[j]) {
+                  finalString += shuffledCharacters[j];
+              }
+          }
+      }
+
+      let key = shuffledCharacters.join('');
+
+      eTitle = "Encryption Tool";
+      eDescription = "```Encrypted Text:\n"+finalString+"\nKey:\n"+key+"```";
+      
+      break;
+    
+    case 'decrypt':
       break;
   
     default:
