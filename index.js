@@ -36,6 +36,7 @@ function shuffle(a) {
 
 client.once('ready', () => {
     console.log('Ready!');
+    client.user.setActivity('for ch help...', { type: 'LISTENING' });
 });
 
 /*
