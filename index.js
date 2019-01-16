@@ -31,7 +31,7 @@ function randInt(a,b){return Math.floor((Math.random()*b)+a)}
 
 client.once('ready', () => {
     console.log('Ready!');
-    client.user.setActivity('ch help... | Serving '+client.users.size+' users among '+client.guilds.size+' servers.', { type: 'LISTENING' });
+    client.user.setActivity('ch help | Serving '+client.users.size+' users among '+client.guilds.size+' servers.', { type: 'LISTENING' });
 });
 
 client.on('message', message => {
@@ -77,34 +77,23 @@ client.on('message', message => {
       
     case 'help':
       if (command[2]) {
-        switch (command[2].toLowerCase()) {
-          case 'help':
-            break;
-          case 'ping':
-            break;
-          case 'coinflip':
-          case 'coin':
-            break;
-          case 'info':
-            break;
-          case 'encrypt':
-            break;
-          case 'decrypt':
-            break;
-          case 'server':
-            break;
-          default:
-            sendEmbed = true;
-            eTitle = 'Information on the command'
-            break;
+        for (var i in help) {
+          help[i].names.forEach(element => {
+            if (command[2].toLowerCase() == element) {
+              sendEmbed = true;
+              eTitle = "Help information on the command "+help[i].names[0];
+              eDescription = "Description: ```"+help[i].description+"```\n\
+                              Usage: ```"+help[i].usage+"```";
+            }
+          });
         }
       } else {
         sendEmbed = true;
         eTitle = "Help";
         eDescription = "Commands available:\n\
                         ```help ping coinflip/coin info encrypt decrypt server```\n\
-                        *Please be aware that not all the commands listed here will be fully functional.*\n\
-                        *Also the bot will not always be online as I have no confidence in this working well.*";
+                        You can also type ch help [command] to see the description and usage of that command.\n\n\
+                        *Please be aware that not all the commands listed here will be fully functional.*";
       }
       
       break;
@@ -123,6 +112,7 @@ client.on('message', message => {
     
     case 'info':
       sendEmbed = true;
+      eTitle = "Information";
       eDescription = "**Information about this bot**\nThe bot's GitHub page: [click here](https://github.com/EliotChignell/ChigBot)\nMy (the developer's) website: [click here](https://eliotchignell.github.io)\nThe bot's website: [click here](https://eliotchignell.github.io/ChigBot)\n\n**Statistics about this bot:**\nRunning on `"+client.guilds.size+"` servers,\nServing `"+client.users.size+"` users,\nListening on `"+client.channels.size+"` channels.\n\n*Version: TVFDV (The Very Flawed Developer Version)*";
       break;
     

@@ -1,0 +1,37 @@
+{
+    "help": {
+        "names": ["Help","help"],
+        "description": "This command simply informs you on the commands available and serves as a starting point for new users.",
+        "usage": "ch help OR ch help [command]"
+    },
+    "ping": {
+        "names": ["Ping","ping"],
+        "description": "This command tells you the ping which is the amount of time it takes for the bot to respond to a request. This number may be quite high.",
+        "usage": "ch ping"
+    },
+    "coinflip": {
+        "names": ["Coinflip","coinflip","coin","flipcoin"],
+        "description": "This command flips a coin and tells you whether the result was Heads or Tails. Not that exciting.",
+        "usage": "ch coinflip/coin"
+    },
+    "info": {
+        "names": ["Info","info"],
+        "description": "This command tells you some useful links relating to the bot and some other nifty statistics.",
+        "usage": "ch info"
+    },
+    "encrypt": {
+        "names": ["Encrypt","encrypt"],
+        "description": "**Only works in DM** This command encrypt your inputted text. The encryption is very weak so don't use it for any important information.",
+        "usage": "ch encrypt [text to be encrypted]"
+    },
+    "decrypt": {
+        "names": ["Decrypt","decrypt"],
+        "description": "**Only works in DM** This command decrypts your encrypted text. You can only decrypt text that you encrypted using ChigBot.",
+        "usage": "ch decrypt [key] [encrypted text]"
+    },
+    "server": {
+        "names": ["Server","server"],
+        "description": "This command tells you useful information about the server you are currently in.",
+        "usage": "ch server"
+    }
+}
