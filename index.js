@@ -91,7 +91,7 @@ client.on('message', message => {
         sendEmbed = true;
         eTitle = "Help";
         eDescription = "Commands available:\n\
-                        ```help ping coinflip/coin info encrypt decrypt server```\n\
+                        ```help ping coinflip/coin info encrypt decrypt server balance/bal gamble```\n\
                         You can also type ch help [command] to see the description and usage of that command.\n\n\
                         *Please be aware that not all the commands listed here will be fully functional.*";
       }
@@ -120,7 +120,7 @@ client.on('message', message => {
 
       input = '';
       sendEmbed = false;
-      if (message.guild) return message.reply("You cannot encrypt/decrypt in a server/group dm!\nPlease DM me to encrypt/decrypt a message!");
+      if (message.guild) return message.channel.send("You cannot encrypt/decrypt in a server/group dm!\nPlease DM me to encrypt/decrypt a message!");
       sendEmbed = true;
 
       for (var i=2;i<command.length;i++) {
@@ -149,6 +149,8 @@ client.on('message', message => {
     
     case 'decrypt':
       
+      if (message.guild) return message.channel.send("You cannot encrypt/decrypt in a server/group dm!\nPlease DM me to encrypt/decrypt a message!");
+
       key = command;
       key.splice(0,2);
       key.length = 2;
@@ -193,11 +195,12 @@ client.on('message', message => {
       if (rand == 1) { // Win
         client.points.math(message.author.id, "+", Math.floor(parseInt(command[2])*1.5), "points");
         sendEmbed = true;
-        eDescription = 'You lost!';
+        eDescription = 'You won!';
       } else if (rand == 2) { // Loss Oof
         client.points.math(message.author.id, "-", parseInt(command[2]), 'points');
+        //client.points.set(message.author.id, client.points.get(message.author.id, 'points')-parseInt(command[2]),'points');
         sendEmbed = true;
-        eDescription = 'You won!';
+        eDescription = 'You lost...';
       }
       break;
 

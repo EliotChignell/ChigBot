@@ -21,12 +21,12 @@
     },
     "encrypt": {
         "names": ["Encrypt","encrypt"],
-        "description": "**Only works in DM** This command encrypt your inputted text. The encryption is very weak so don't use it for any important information.",
+        "description": "(Only works in DM) This command encrypt your inputted text. The encryption is very weak so don't use it for any important information.",
         "usage": "ch encrypt [text to be encrypted]"
     },
     "decrypt": {
         "names": ["Decrypt","decrypt"],
-        "description": "**Only works in DM** This command decrypts your encrypted text. You can only decrypt text that you encrypted using ChigBot.",
+        "description": "(Only works in DM) This command decrypts your encrypted text. You can only decrypt text that you encrypted using ChigBot.",
         "usage": "ch decrypt [key] [encrypted text]"
     },
     "server": {
