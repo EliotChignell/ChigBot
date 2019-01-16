@@ -7,9 +7,12 @@
 */
 
 const secrets = require("./secrets.json");
+const help = require('./docs/help.json');
 
 const Discord = require('discord.js');
+const Enmap = require('enmap');
 const client = new Discord.Client();
+client.points = new Enmap({name:'points'});
 
 var eColor, eTitle, eAuthor, eDescription, eFooter, eImage, eThumbnail, embed;
 var sendEmbed = false;
@@ -22,41 +25,43 @@ const characters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o',
 const oCharacters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',' '];
 let shuffledCharacters = [];
 
-function shuffle(a) {
-  let b = a;
-  var j, x, i;
-  for (i = b.length - 1; i > 0; i--) {
-      j = Math.floor(Math.random() * (i + 1));
-      x = b[i];
-      b[i] = b[j];
-      b[j] = x;
-  }
-  return b;
-}
+// Useful functions
+function shuffle(a){let b=a;var j,x,i;for(i=b.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));x=b[i];b[i]=b[j];b[j]=x};return b}
+function randInt(a,b){return Math.floor((Math.random()*b)+a)}
 
 client.once('ready', () => {
     console.log('Ready!');
-    client.user.setActivity('ch help...', { type: 'LISTENING' });
+    client.user.setActivity('ch help... | Serving '+client.users.size+' users among '+client.guilds.size+' servers.', { type: 'LISTENING' });
 });
 
-/*
-Copy this
-
-sendEmbed = true;
-eTitle = "";
-eDescription = "";
-eImage = "";
-eThumbnail = "";
-
-*/
-
 client.on('message', message => {
+
+  client.points.ensure(message.author.id,{
+    tag:message.author.tag,
+    points: 0,
+  });
+
+  sendEmbed = false;
+  eTitle = '';
+  eDescription = '';
+  eImage = '';
+  eThumbnail = '';
   
-  if (!message.content.startsWith('ch')) return;
+  if (!message.content.startsWith('ch') || message.author.bot) return;
   
   let command = message.content.split(' ');
   let eCommand = message.content.split(' ');
-  const eColor = message.guild.members.get('442184461405126656').displayHexColor;
+
+  /*
+  if (message.guild) {
+    const eColor = message.guild.members.get('442184461405126656').displayHexColor;
+  } else {
+    console.log('dm');
+    const eColor = "#ff8300";
+  }
+  */
+
+  // Logging commands
   console.log("("+message.author.username+") "+message.content);
 
   finalString = '';
@@ -71,9 +76,37 @@ client.on('message', message => {
       break;
       
     case 'help':
-      sendEmbed = true;
-      eTitle = "Help";
-      eDescription = "Commands available:\n```help ping```";
+      if (command[2]) {
+        switch (command[2].toLowerCase()) {
+          case 'help':
+            break;
+          case 'ping':
+            break;
+          case 'coinflip':
+          case 'coin':
+            break;
+          case 'info':
+            break;
+          case 'encrypt':
+            break;
+          case 'decrypt':
+            break;
+          case 'server':
+            break;
+          default:
+            sendEmbed = true;
+            eTitle = 'Information on the command'
+            break;
+        }
+      } else {
+        sendEmbed = true;
+        eTitle = "Help";
+        eDescription = "Commands available:\n\
+                        ```help ping coinflip/coin info encrypt decrypt server```\n\
+                        *Please be aware that not all the commands listed here will be fully functional.*\n\
+                        *Also the bot will not always be online as I have no confidence in this working well.*";
+      }
+      
       break;
       
     case 'coinflip':
@@ -90,15 +123,14 @@ client.on('message', message => {
     
     case 'info':
       sendEmbed = true;
-      eTitle = 'Information about this bot';
-      eDescription = "The bot's GitHub page: [click here](https://github.com/EliotChignell/ChigBot)\nMy (the developer's) website: [click here](https://eliotchignell.github.io)\nThe bot's website: [click here](https://eliotchignell.github.io/ChigBot)";
+      eDescription = "**Information about this bot**\nThe bot's GitHub page: [click here](https://github.com/EliotChignell/ChigBot)\nMy (the developer's) website: [click here](https://eliotchignell.github.io)\nThe bot's website: [click here](https://eliotchignell.github.io/ChigBot)\n\n**Statistics about this bot:**\nRunning on `"+client.guilds.size+"` servers,\nServing `"+client.users.size+"` users,\nListening on `"+client.channels.size+"` channels.\n\n*Version: TVFDV (The Very Flawed Developer Version)*";
       break;
     
     case 'encrypt':
 
       input = '';
       sendEmbed = false;
-      if (!message.channel.type == "dm") return message.reply("You cannot encrypt/decrypt in a server/group dm!\nPlease DM me to encrypt/decrypt a message!");
+      if (message.guild) return message.reply("You cannot encrypt/decrypt in a server/group dm!\nPlease DM me to encrypt/decrypt a message!");
       sendEmbed = true;
 
       for (var i=2;i<command.length;i++) {
@@ -134,23 +166,10 @@ client.on('message', message => {
 
       input = eCommand;
       input.shift();
-      console.log(input);
       input.shift();
-      console.log(input);
       input.shift();
-      console.log(input);
       input.shift();
-      console.log(input);
       input = input.join(' ');
-      console.log('Key: '+key);
-      console.log('Input: '+input);
-
-      /*
-      key.splice(0,2);
-      key.length = 2;
-      key.join(' ').toString();
-      console.log(key);
-      */
 
       for (var i=0;i<input.length;i++) {
           for (var j=0;j<key.length;j++) {
@@ -165,6 +184,55 @@ client.on('message', message => {
       eDescription = 'Decrypted Text:\n```'+finalString+'```';
       break;
   
+
+    case 'balance':
+    case 'bal':
+    case 'money':
+    case 'credits':
+    case 'creds':
+      sendEmbed = true;
+      eTitle = message.author.username+"'s Balance";
+      eDescription = client.points.get(message.author.id, 'points')+' credits';
+      break;
+
+    case 'gamble':
+      if (!parseInt(command[2])) return message.channel.send('Please use the correct usage: `ch gamble [amount]`');
+      if (parseInt(command[2]) > client.points.get(message.author.id,'points')) return message.channel.send("You don't have that much money! "+parseInt(command[2])+", "+client.points.get(message.author.id,'points'));
+    
+      let rand = Math.floor((Math.random() * 2) + 1);
+      if (rand == 1) { // Win
+        client.points.math(message.author.id, "+", Math.floor(parseInt(command[2])*1.5), "points");
+        sendEmbed = true;
+        eDescription = 'You lost!';
+      } else if (rand == 2) { // Loss Oof
+        client.points.math(message.author.id, "-", parseInt(command[2]), 'points');
+        sendEmbed = true;
+        eDescription = 'You won!';
+      }
+      break;
+
+    case 'add':
+      if (message.author.id == 401649168948396032) {
+        client.points.math(message.author.id, "+", parseInt(command[2]), 'points');
+        message.channel.send('that worked...');
+      }
+      break;
+
+    case 'server':
+      if (!message.guild) return message.channel.send('You are not currently in a server!');
+
+      sendEmbed = true;
+      eTitle = "Information on the server `"+message.guild.name+"`:";
+      eDescription = "Amount of members: `"+message.guild.memberCount+"`\n\
+                      Amount of channels: `"+message.guild.channels.size+"`\n\
+                      Was created on: `"+message.guild.createdAt+"`\n\
+                      ID: `"+message.guild.id+"`\n\
+                      Whether this server is verified: `"+message.guild.verified+"`\n\
+                      Owner: @"+message.guild.owner.user.tag+"\n\
+                      Region: `"+message.guild.region+"`";
+      eThumbnail = message.guild.iconURL;
+      break;
+    
     default:
       sendEmbed = true;
       eTitle = "Invalid Command.";
@@ -175,16 +243,16 @@ client.on('message', message => {
   }
 
   if (sendEmbed) {
-	let embed = new Discord.RichEmbed()
-    .setTitle(eTitle)
-    .setAuthor("chigbot",client.user.displayAvatarURL)
-    .setColor(eColor)
-    .setDescription(eDescription)
-    .setFooter("ch [command]")
-    .setImage(eImage)
-    .setThumbnail(eThumbnail)
-    .setTimestamp();
-    message.channel.send(embed);
+    let embed = new Discord.RichEmbed()
+      .setTitle(eTitle)
+      .setAuthor("ChigBot",client.user.displayAvatarURL)
+      .setColor(0xff8300)
+      .setDescription(eDescription)
+      .setFooter("ch [command]")
+      .setImage(eImage)
+      .setThumbnail(eThumbnail)
+      .setTimestamp();
+      message.channel.send(embed);
   } 
    
 });
