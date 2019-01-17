@@ -33,5 +33,15 @@
         "names": ["Server","server"],
         "description": "This command tells you useful information about the server you are currently in.",
         "usage": "ch server"
+    },
+    "balance": {
+        "names": ["Balance","balance","bal","credits","money","creds"],
+        "description": "This command tells you your balance. That's all.",
+        "usage": "ch balance/bal"
+    },
+    "gamble": {
+        "names": ["Gamble","gamble"],
+        "description": "This command basically flips a coin. If Heads, it gives you 1.5x your gambled amount of credits back and if Tails, you lose your gambled amount of credits.",
+        "usage": "ch gamble [amount of credits to be gambled]"
     }
 }

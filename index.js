@@ -225,6 +225,10 @@ client.on('message', message => {
                       Region: `"+message.guild.region+"`";
       eThumbnail = message.guild.iconURL;
       break;
+
+    case 'invite':
+      message.channel.send('https://discordapp.com/oauth2/authorize?client_id=442184461405126656&permissions=0&scope=bot');
+      break;
     
     default:
       sendEmbed = true;
