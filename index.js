@@ -286,19 +286,30 @@ client.on('message', async (message) => {
 
     case 'leaderboard':
     case 'board':
-      let sorted = client.points.array().sort((a, b) => a.points - b.points).reverse().splice(0,10);
-      sendEmbed = false;
-      embed = new Discord.RichEmbed()
-        .setTitle("Credits Leaderboard")
-        .setAuthor("ChigBot",client.user.displayAvatarURL)
-        .setColor(0xff8300)
-        .setDescription("Our Top 10:")
-        .setFooter("ch [command]")
-        .setTimestamp();
-      for (const data of sorted) {
-        embed.addField(client.users.get(data.id).tag,data.points+" credits");
+
+      if (!command[2]) {
+        let sorted = client.points.array().sort((a, b) => a.points - b.points).reverse().splice(0,10);
+        sendEmbed = false;
+        embed = new Discord.RichEmbed()
+          .setTitle("Credits Leaderboard")
+          .setAuthor("ChigBot",client.user.displayAvatarURL)
+          .setColor(0xff8300)
+          .setDescription("Our Top 10:")
+          .setFooter("ch [command]")
+          .setTimestamp();
+        for (const data of sorted) {
+          embed.addField(client.users.get(data.id).tag,data.points+" credits");
+        }
+        message.channel.send(embed);
+      } else if (command[2]) {
+        let users = Object.values(client.users);
+        let guildUsers = Object.values(message.guild.members);
+        for (var i=0;i<users.length;i++) {
+          for (var j=0;j<guildUsers.length;j++) {
+          }
+        }
       }
-      message.channel.send(embed);
+      
         
       break;
     
