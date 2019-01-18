@@ -61,7 +61,12 @@
     },
     "leaderboard": {
         "names": ["Leaderboard","leaderboard","board"],
-        "description": "This command shows you the Top 10 users in terms of credits.",
-        "usage": "ch leaderboard/board"
+        "description": "This command shows you the Top 10 users in terms of credits.Type ch board global to view the worldwide credit standings.",
+        "usage": "ch leaderboard/board OR ch board global/world"
+    },
+    "give": {
+        "names": ["Give","give"],
+        "description": "This command allows you to give credits to your friends. :)",
+        "usage": "ch give [user] [amount]"
     }
 }
