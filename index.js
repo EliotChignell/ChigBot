@@ -14,7 +14,7 @@ const Enmap = require('enmap');
 const client = new Discord.Client();
 client.points = new Enmap({name:'points'});
 
-var eColor, eTitle, eAuthor, eDescription, eFooter, eImage, eThumbnail, embed;
+var eColor, eTitle, eAuthor, eDescription, eFooter, eImage, eThumbnail, embed, user;
 var sendEmbed = false;
 
 // Encryption Variables and Functions
@@ -38,17 +38,20 @@ client.once('ready', () => {
 
 client.on('message', async (message) => {
 
-  client.points.ensure(message.author.id,{
-    id: message.author.id,
-    tag:message.author.tag,
-    username:message.author.username,
-    points: 100,
-    lastDaily: new Date().getTime()-86400000,
-    lastWeekly: new Date().getTime()-604800000,
-    lastMine: new Date().getTime()-600000,
-    lastGamble: new Date().getTime()-6000,
-    items: []
-  });
+  if (!message.author.bot) {
+    client.points.ensure(message.author.id,{
+      id: message.author.id,
+      tag:message.author.tag,
+      username:message.author.username,
+      points: 100,
+      lastDaily: new Date().getTime()-86400000,
+      lastWeekly: new Date().getTime()-604800000,
+      lastMine: new Date().getTime()-600000,
+      lastGamble: new Date().getTime()-6000,
+      items: [],
+      lastConfirm: ''
+    });
+  }
 
   sendEmbed = false;
   eTitle = '';
@@ -57,6 +60,7 @@ client.on('message', async (message) => {
   eThumbnail = '';
   creds = 0;
   current = 0;
+
   
   let command = message.content.split(' ');
   let eCommand = message.content.split(' ');
@@ -72,6 +76,7 @@ client.on('message', async (message) => {
   if (command.length == 1) return;
 
   switch(command[1].toLowerCase()) {
+
     case 'ping':
       const m = await message.channel.send('Pinging...');
       m.edit('Pong! Ping is: '+m.createdTimestamp-message.createdTimestamp);
@@ -186,7 +191,7 @@ client.on('message', async (message) => {
     case 'creds':
       if (command[2]) {
         if (!message.mentions.users.first()) return message.channel.send('Please mention someone...');
-        const user = message.mentions.users.first() || client.users.get(command[1]);
+        user = message.mentions.users.first() || client.users.get(command[2]);
         if (!client.points.has(user.id)) return message.channel.send('This user does not exist on my database...');
         sendEmbed = true;
         eTitle = user.username+"'s Balance";
@@ -200,7 +205,7 @@ client.on('message', async (message) => {
 
     case 'gamble':
       if (!parseInt(command[2])) return message.channel.send('Please use the correct usage: `ch gamble [amount]`');
-      if (parseInt(command[2]) > client.points.get(message.author.id,'points')) return message.channel.send("You don't have that much money! "+parseInt(command[2])+", "+client.points.get(message.author.id,'points'));
+      if (parseInt(command[2]) > client.points.get(message.author.id,'points')) return message.channel.send("You don't have that much money! "+parseInt(command[2])+" > "+client.points.get(message.author.id,'points'));
     
       let rand = Math.floor((Math.random() * 2) + 1);
       if (rand == 1) { // Win
@@ -209,7 +214,7 @@ client.on('message', async (message) => {
         eDescription = 'You won!';
       } else if (rand == 2) { // Loss Oof
         client.points.math(message.author.id, "-", parseInt(command[2]), 'points');
-        //client.points.set(message.author.id, client.points.get(message.author.id, 'points')-parseInt(command[2]),'points');
+        // client.points.set(message.author.id, client.points.get(message.author.id, 'points')-parseInt(command[2]),'points');
         sendEmbed = true;
         eDescription = 'You lost...';
       }
@@ -280,37 +285,65 @@ client.on('message', async (message) => {
       break;
 
     case 'id':
-      // const user = message.mentions.users.first() || client.users.get(command[1]);
-      // message.channel.send(user.id);
+      user = message.mentions.users.first() || client.users.get(command[1]);
+      message.channel.send(user.id);
       break;
 
     case 'leaderboard':
     case 'board':
 
-      if (!command[2]) {
+      if (command[2]) {
         let sorted = client.points.array().sort((a, b) => a.points - b.points).reverse().splice(0,10);
+        sendEmbed = false;
+        let rDescription = "The Worldwide Top 10:```diff\n";
+        for (const data of sorted) {
+          rDescription += "\n- "+client.users.get(data.id).tag+"\n+ "+data.points+" credits";
+        }
+        rDescription += '```';
+        embed = new Discord.RichEmbed()
+          .setTitle("Credits Leaderboard")
+          .setAuthor("ChigBot",client.user.displayAvatarURL)
+          .setColor(0xff8300)
+          .setDescription(rDescription)
+          .setFooter("ch [command]")
+          .setTimestamp();
+        
+        message.channel.send(embed);
+      } else if (!command[2]) {
+        let foundUsers = [];
+        let guildIDs = [];
+        message.guild.members.forEach(member => {
+          if (client.points.has(member.id)) guildIDs.push(member.id);
+        });
+        let sorted = client.points.array().filter(p => guildIDs.includes(p.id)).sort((a, b) => a.points - b.points).reverse().splice(0,10);
+        let rDescription = "The Top 10 of the server `"+message.guild.name+"`:```diff\n";
+        for (const data of sorted) {
+          rDescription += "\n- "+client.users.get(data.id).tag+"\n+ "+data.points+" credits";
+        }
+        rDescription += '```\nType `ch board world` to find out the worldwide standings.';
         sendEmbed = false;
         embed = new Discord.RichEmbed()
           .setTitle("Credits Leaderboard")
           .setAuthor("ChigBot",client.user.displayAvatarURL)
           .setColor(0xff8300)
-          .setDescription("Our Top 10:")
+          .setDescription(rDescription)
           .setFooter("ch [command]")
           .setTimestamp();
-        for (const data of sorted) {
-          embed.addField(client.users.get(data.id).tag,data.points+" credits");
-        }
         message.channel.send(embed);
-      } else if (command[2]) {
-        let users = Object.values(client.users);
-        let guildUsers = Object.values(message.guild.members);
-        for (var i=0;i<users.length;i++) {
-          for (var j=0;j<guildUsers.length;j++) {
-          }
-        }
       }
-      
-        
+      break;
+
+    case 'give':
+      if (!(command[2] && command[3])) return message.channel.send("Please specifiy a valid user and amount! e.g.: `ch give @Person#1234 100`");
+      if (!parseInt(command[3])) return message.channel.send("Please specifiy a valid user and amount! e.g.: `ch give @Person#1234 100`");
+      if (!message.mentions.users.first()) return message.channel.send("Please specifiy a valid user and amount! e.g.: `ch give @Person#1234 100`");
+      user = message.mentions.users.first() || client.users.get(command[2]);
+      if (client.points.get(message.author.id,"points") < parseInt(command[3])) return message.channel.send("You don't have that much money! "+parseInt(command[3])+" > "+client.points.get(message.author.id,'points'));
+      client.points.math(message.author.id, "-", parseInt(command[3]), 'points');
+      client.points.math(user.id, "+", parseInt(command[3]), 'points');
+      sendEmbed = true;
+      eTitle = "Transaction";
+      eDescription = "```You ("+message.author.tag+") gave "+client.users.get(user.id).tag+" "+parseInt(command[3])+" credits.```";
       break;
     
     default:

@@ -13,25 +13,21 @@
     <div class="commands">
       <h2>Commands</h2>
       <h3>Prefix: ch [command]</h3>
-
-      <h4>ch help</h4>
-      <p>This serves as a starting point for new users. Use this command to find out the available commands.</p>
-
-      <h4>ch ping</h4>
-      <p>This is a simple command which tells the user the ping.</p>
-
-      <h4>ch coinflip/coin/flipcoin</h4>
-      <p>This command will simply flip a coin with the two possible outcomes of heads(true) and tails(false).</p>
-
-      <h4>ch info</h4>
-      <p>This command will tell the user links to the bot's Github page and my website.</p>
-
-      <h4>ch encrypt [text to be encrypted]</h4>
-      <p>This command returns your encrypted text and a key to decrypt it.</p>
-
-      <h4>ch decrypt [key] [encrypted text]</h4>
-      <p>This command returns your decrypted text.</p>
     </div>
-    
+
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous"></script>
+
+    <script>
+        let commands = document.querySelector('.commands');
+        var help = $.getJSON('https://api.myjson.com/bins/zt65c', data => {
+          for (var i in data) {
+            commands.innerHTML += "<h4>"+data[i].usage+"</h4>"+"<p>"+data[i].description+"</p>";
+            console.log(data[i].usage);
+          }
+        });
+    </script>
   </body>
 </html>
