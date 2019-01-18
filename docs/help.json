@@ -36,12 +36,32 @@
     },
     "balance": {
         "names": ["Balance","balance","bal","credits","money","creds"],
-        "description": "This command tells you your balance. That's all.",
-        "usage": "ch balance/bal"
+        "description": "This command tells you your balance. Do ch bal [@Chig#4519] to find out someone else's balance.",
+        "usage": "ch balance/bal OR ch balance/bal [mention someone]"
     },
     "gamble": {
         "names": ["Gamble","gamble"],
         "description": "This command basically flips a coin. If Heads, it gives you 1.5x your gambled amount of credits back and if Tails, you lose your gambled amount of credits.",
         "usage": "ch gamble [amount of credits to be gambled]"
+    },
+    "invite": {
+        "names": ["Invite","invite"],
+        "description": "This command will return the link required to invite ChigBot to other servers.",
+        "usage": "ch invite"
+    },
+    "daily": {
+        "names": ["Daily","daily"],
+        "description": "This command will be able to give you 100+10% of your credits every day.",
+        "usage": "ch daily"
+    },
+    "weekly": {
+        "names": ["Weekly","weekly"],
+        "description": "This command will be able to give you 100+33% of your credits every week.",
+        "usage": "ch weekly"
+    },
+    "leaderboard": {
+        "names": ["Leaderboard","leaderboard","board"],
+        "description": "This command shows you the Top 10 users in terms of credits.",
+        "usage": "ch leaderboard/board"
     }
 }

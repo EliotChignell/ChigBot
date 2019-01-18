@@ -28,17 +28,26 @@ let shuffledCharacters = [];
 // Useful functions
 function shuffle(a){let b=a;var j,x,i;for(i=b.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));x=b[i];b[i]=b[j];b[j]=x};return b}
 function randInt(a,b){return Math.floor((Math.random()*b)+a)}
+function msToTime(e){var n=parseInt(e%1e3/100),r=parseInt(e/1e3%60),t=parseInt(e/6e4%60),a=parseInt(e/36e5%24);return(a=a<10?"0"+a:a)+"h:"+(t=t<10?"0"+t:t)+"m:"+(r=r<10?"0"+r:r)+"s"}
+function msToTime2(e){parseInt(e%1e3/100);var n=parseInt(e/1e3%60),r=parseInt(e/6e4%60),s=parseInt(e/36e5%24),t=parseInt(e/864e5%7);return(t=t<10?"0"+t:t)+"d:"+(s=s<10?"0"+s:s)+"h:"+(r=r<10?"0"+r:r)+"m:"+(n=n<10?"0"+n:n)+"s."}
 
 client.once('ready', () => {
     console.log('Ready!');
     client.user.setActivity('ch help | Serving '+client.users.size+' users among '+client.guilds.size+' servers.', { type: 'LISTENING' });
 });
 
-client.on('message', message => {
+client.on('message', async (message) => {
 
   client.points.ensure(message.author.id,{
+    id: message.author.id,
     tag:message.author.tag,
-    points: 0,
+    username:message.author.username,
+    points: 100,
+    lastDaily: new Date().getTime()-86400000,
+    lastWeekly: new Date().getTime()-604800000,
+    lastMine: new Date().getTime()-600000,
+    lastGamble: new Date().getTime()-6000,
+    items: []
   });
 
   sendEmbed = false;
@@ -46,33 +55,26 @@ client.on('message', message => {
   eDescription = '';
   eImage = '';
   eThumbnail = '';
-  
-  if (!message.content.startsWith('ch') || message.author.bot) return;
+  creds = 0;
+  current = 0;
   
   let command = message.content.split(' ');
   let eCommand = message.content.split(' ');
-
-  /*
-  if (message.guild) {
-    const eColor = message.guild.members.get('442184461405126656').displayHexColor;
-  } else {
-    console.log('dm');
-    const eColor = "#ff8300";
-  }
-  */
+  if (!(command[0] == 'ch') || message.author.bot) return;
+  
+  // const eColor = message.guild.members.get('442184461405126656').displayHexColor;
 
   // Logging commands
   console.log("("+message.author.username+") "+message.content);
 
   finalString = '';
 
+  if (command.length == 1) return;
+
   switch(command[1].toLowerCase()) {
     case 'ping':
-	    sendEmbed = true;
-      eTitle = "";
-      eDescription = "**Pong!** :ping_pong:\nPing: "+client.ping+"ms";
-      eImage = "";
-      eThumbnail = "";
+      const m = await message.channel.send('Pinging...');
+      m.edit('Pong! Ping is: '+m.createdTimestamp-message.createdTimestamp);
       break;
       
     case 'help':
@@ -91,7 +93,7 @@ client.on('message', message => {
         sendEmbed = true;
         eTitle = "Help";
         eDescription = "Commands available:\n\
-                        ```help ping coinflip/coin info encrypt decrypt server balance/bal gamble```\n\
+                        ```css\nhelp ping coinflip/coin info encrypt decrypt server balance/bal gamble invite daily weekly leaderboard/board```\n\
                         You can also type ch help [command] to see the description and usage of that command.\n\n\
                         *Please be aware that not all the commands listed here will be fully functional.*";
       }
@@ -182,9 +184,18 @@ client.on('message', message => {
     case 'money':
     case 'credits':
     case 'creds':
-      sendEmbed = true;
-      eTitle = message.author.username+"'s Balance";
-      eDescription = client.points.get(message.author.id, 'points')+' credits';
+      if (command[2]) {
+        if (!message.mentions.users.first()) return message.channel.send('Please mention someone...');
+        const user = message.mentions.users.first() || client.users.get(command[1]);
+        if (!client.points.has(user.id)) return message.channel.send('This user does not exist on my database...');
+        sendEmbed = true;
+        eTitle = user.username+"'s Balance";
+        eDescription = client.points.get(user.id, 'points')+' credits';
+      } else {
+        sendEmbed = true;
+        eTitle = message.author.username+"'s Balance";
+        eDescription = client.points.get(message.author.id, 'points')+' credits';
+      }
       break;
 
     case 'gamble':
@@ -229,6 +240,67 @@ client.on('message', message => {
     case 'invite':
       message.channel.send('https://discordapp.com/oauth2/authorize?client_id=442184461405126656&permissions=0&scope=bot');
       break;
+
+    case 'daily':
+      let lastDaily = client.points.get(message.author.id,"lastDaily");
+      creds = Math.floor(client.points.get(message.author.id,'points')/10)+100;
+      current = new Date().getTime();
+      if (lastDaily+86400000 <= current) { // Enough time
+        client.points.math(message.author.id, "+", creds,"points");
+        client.points.set(message.author.id, current, "lastDaily");
+        sendEmbed = true;
+        eTitle = "Daily Credits";
+        eDescription = "**You recieved "+creds+" credits!**\n\
+                        Your current balance: "+client.points.get(message.author.id,"points")+" credits.\n\n\
+                        _Each day you recieve 100+10% of your balance_";
+      } else if (lastDaily+86400000 > current) {
+        sendEmbed = true;
+        eTitle = "Daily Credits";
+        eDescription = "Please wait: "+msToTime((lastDaily+86400000)-current);
+      }
+      break;
+
+    case 'weekly':
+      let lastWeekly = client.points.get(message.author.id,"lastWeekly");
+      creds = Math.floor(client.points.get(message.author.id,'points')/3)+100;
+      current = new Date().getTime();
+      if (lastWeekly+604800000 <= current) {
+        client.points.math(message.author.id, "+", creds,"points");
+        client.points.set(message.author.id, current, "lastWeekly");
+        sendEmbed = true;
+        eTitle = "Weekly Credits";
+        eDescription = "**You recieved "+creds+" credits!**\n\
+                        Your current balance: "+client.points.get(message.author.id,"points")+" credits.\n\n\
+                        _Every week day you recieve 100+33% of your balance_";
+      } else if (lastWeekly+604800000 > current) {
+        sendEmbed = true;
+        eTitle = "Weekly Credits";
+        eDescription = "Please wait: "+msToTime2((lastWeekly+604800000)-current);
+      }
+      break;
+
+    case 'id':
+      // const user = message.mentions.users.first() || client.users.get(command[1]);
+      // message.channel.send(user.id);
+      break;
+
+    case 'leaderboard':
+    case 'board':
+      let sorted = client.points.array().sort((a, b) => a.points - b.points).reverse().splice(0,10);
+      sendEmbed = false;
+      embed = new Discord.RichEmbed()
+        .setTitle("Credits Leaderboard")
+        .setAuthor("ChigBot",client.user.displayAvatarURL)
+        .setColor(0xff8300)
+        .setDescription("Our Top 10:")
+        .setFooter("ch [command]")
+        .setTimestamp();
+      for (const data of sorted) {
+        embed.addField(client.users.get(data.id).tag,data.points+" credits");
+      }
+      message.channel.send(embed);
+        
+      break;
     
     default:
       sendEmbed = true;
@@ -253,5 +325,7 @@ client.on('message', message => {
   } 
    
 });
+
+client.on('error', console.error);
 
 client.login(secrets.token); 
