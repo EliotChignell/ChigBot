@@ -68,5 +68,10 @@
         "names": ["Give","give"],
         "description": "This command allows you to give credits to your friends. :)",
         "usage": "ch give [user] [amount]"
+    },
+    "prefix": {
+        "names": ["Prefix","prefix"],
+        "description": "This command allows the owner of the server to change the prefix",
+        "usage": "ch prefix [prefix] OR ch prefix default"
     }
 }
