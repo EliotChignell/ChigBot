@@ -19,6 +19,7 @@ client.points = new Enmap({name:'points'});
 const serverList = new Enmap({name:'servers'});
 
 var eColor, eTitle, eAuthor, eDescription, eFooter, eImage, eThumbnail, embed, user;
+var clientReady = false;
 var sendEmbed = false;
 
 // Encryption Variables and Functions
@@ -37,15 +38,20 @@ function msToTime2(e){parseInt(e%1e3/100);var n=parseInt(e/1e3%60),r=parseInt(e/
 
 client.once('ready', () => {
     console.log('Ready!');
+    clientReady = true;
     client.user.setActivity('ch help | '+client.users.size+' users among '+client.guilds.size+' servers.', { type: 'LISTENING' });
 });
 
 client.on('message', async (message) => {
-  serverList.ensure(message.guild.id, {
-    id: message.guild.id,
-    prefix: 'ch '
-  });
-  if (message.guild.me.hasPermission('MANAGE_NICKNAMES')) message.guild.me.setNickname('ChigBot | '+serverList.get(message.guild.id,'prefix')+"help");
+  if (message.guild) {
+    serverList.ensure(message.guild.id, {
+      id: message.guild.id,
+      prefix: 'ch ',
+      loggingChannel: 0
+    });
+  }
+  
+  if (message.guild && message.guild.me.hasPermission('MANAGE_NICKNAMES')) message.guild.me.setNickname('ChigBot | '+serverList.get(message.guild.id,'prefix')+"help");
   if (!message.author.bot) {
     client.points.ensure(message.author.id,{
       id: message.author.id,
@@ -71,11 +77,19 @@ client.on('message', async (message) => {
 
   /* command[1] = message.content.slice(serverList.get(message.guild.id, "prefix").length).split(' ')[0];
   let eCommand = message.content.split(' '); */
-  if (!message.content.startsWith(serverList.get(message.guild.id, "prefix")) || message.author.bot) return;
-  const args = message.content.slice(serverList.get(message.guild.id,"prefix").length).split(' ');
+  if (message.guild) {
+    if (!message.content.startsWith(serverList.get(message.guild.id, "prefix")) || message.author.bot) return;
+  } else {
+    if (!message.content.startsWith("ch ") || message.author.bot) return;
+  }
+
+  let args;
+
+  if (message.guild) args = message.content.slice(serverList.get(message.guild.id,"prefix").length).split(' ');
+  if (!message.guild) args = message.content.slice(3).split(' ');
+
   const command = args.shift().toLowerCase();
- 
-  
+
   // const eColor = message.guild.members.get('442184461405126656').displayHexColor;
 
   // Logging commands
@@ -86,8 +100,9 @@ client.on('message', async (message) => {
   switch(command.toLowerCase()) {
 
     case 'ping':
-      const m = await message.channel.send('Pinging...');
-      m.edit('Pong! Ping is: '+m.createdTimestamp-message.createdTimestamp);
+      const m = await message.channel.send("Ping?");
+      m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
+      
       break;
       
     case 'help':
@@ -132,10 +147,9 @@ client.on('message', async (message) => {
       break;
     
     case 'encrypt':
-
-      input = '';
-      sendEmbed = false;
       if (message.guild) return message.channel.send("You cannot encrypt/decrypt in a server/group dm!\nPlease DM me to encrypt/decrypt a message!");
+      
+      input = '';
       sendEmbed = true;
 
       for (var i=2;i<command.length;i++) {
@@ -238,14 +252,13 @@ client.on('message', async (message) => {
     case 'server':
       if (!message.guild) return message.channel.send('You are not currently in a server!');
 
-      sendEmbed = true;
-      eTitle = "Information on the server `"+message.guild.name+"`:";
-      eDescription = "Amount of members: `"+message.guild.memberCount+"`\n\
+      sendEmbed = await true;
+      eTitle = await "Information on the server `"+message.guild.name+"`:";
+      eDescription = await "Amount of members: `"+message.guild.memberCount+"`\n\
                       Amount of channels: `"+message.guild.channels.size+"`\n\
                       Was created on: `"+message.guild.createdAt+"`\n\
                       ID: `"+message.guild.id+"`\n\
                       Whether this server is verified: `"+message.guild.verified+"`\n\
-                      Owner: @"+message.guild.owner.user.tag+"\n\
                       Region: `"+message.guild.region+"`";
       eThumbnail = message.guild.iconURL;
       break;
@@ -300,16 +313,15 @@ client.on('message', async (message) => {
     case 'leaderboard':
     case 'board':
 
-      if (args[0]) {
+      if (args[0] || !message.guild) {
         let sorted = client.points.array().sort((a, b) => a.points - b.points).reverse().splice(0,10);
-        console.log(sorted); 
         sendEmbed = false;
         let rDescription = "The Worldwide Top 10:```diff\n";
         /*for (const data of sorted) {
           rDescription += "\n- "+client.users.get(parseInt(data.id)).tag+"\n+ "+data.points+" credits";
         }*/
         for (var i=0;i<sorted.length;i++) {
-          rDescription += "\n- "+client.users.get(sorted[i].id).tag+"\n+ "+sorted[i].points+" credits";
+          if (client.users.get(sorted[i].id)) rDescription += "\n- "+client.users.get(sorted[i].id).tag+"\n+ "+sorted[i].points+" credits";
         }
         rDescription += '```';
         embed = new Discord.RichEmbed()
@@ -321,7 +333,7 @@ client.on('message', async (message) => {
           .setTimestamp();
         
         message.channel.send(embed);
-      } else if (!args[0]) {
+      } else if (!args[0] && message.guild) {
         let foundUsers = [];
         let guildIDs = [];
         message.guild.members.forEach(member => {
@@ -357,27 +369,50 @@ client.on('message', async (message) => {
       eTitle = "Transaction";
       eDescription = "```You ("+message.author.tag+") gave "+client.users.get(user.id).tag+" "+parseInt(args[1])+" credits.```";
       break;
-    
-    case 'poll':
-      break;
-    
-    case 'prefix':
-      let previousPrefix = serverList.get(message.guild.id, "prefix");
-      if (!(message.author.id == message.guild.owner.id)) return message.channel.send("You have to be the owner of the server to change the prefix. Please ask the owner or contact @chig#4519");
-      if (!args[0]) return message.channel.send('Please specify a prefix. e.g. `ch prefix c!`');
 
-      if (args[0] == "default") {
-        serverList.set(message.guild.id, "ch ", "prefix");
-      } else {
-        serverList.set(message.guild.id, args[0], "prefix");
+    case 'settings':
+      if (!message.guild) return message.channel.send("The `settings` command requires for you to be in a guild.");
+      if (args[0]) {
+        switch (args[0]) {
+          case 'prefix':
+            let previousPrefix = serverList.get(message.guild.id, "prefix");
+            if (!(message.member.hasPermission("ADMINISTRATOR"))) return message.channel.send("You have to be the owner/administrator of the server to change the prefix. Please ask the owner/administrator.");
+            if (!args[1]) return message.channel.send('Please specify a prefix. e.g. `ch prefix c!`');
+      
+            if (args[1] == "default") {
+              serverList.set(message.guild.id, "ch ", "prefix");
+            } else {
+              serverList.set(message.guild.id, args[1], "prefix");
+            }
+      
+            sendEmbed = true;
+            eTitle = "You have changed the prefix for the server `"+message.guild.name+"`.";
+            eDescription = "New prefix: `"+serverList.get(message.guild.id, "prefix")+"`\n\
+                            Old prefix: `"+previousPrefix+"`";
+            break;
+
+          case 'logging':
+            if (!(message.member.hasPermission("ADMINISTRATOR"))) return message.channel.send("You have to be the owner/administrator of the server to change the prefix. Please ask the owner/administrator.");
+            // if (message.guild.channels.get(message.mentions.channels.first.id)) return message.channel.send("Please provide a channel that is in your server.");
+            const channel = await message.mentions.channels.first();
+            serverList.set(message.guild.id, channel.id, "loggingChannel");
+
+            sendEmbed = true;
+            eTitle = "Changed logging channel for the server `"+message.guild.name+"`.";
+            eDescription = "Server: #"+message.mentions.channels.first().name+" ("+message.mentions.channels.first().id+").";
+
+            break;
+          default:
+            message.channel.send("Please provide a valid setting subset! Type `ch settings` to find out your options.");
+            break;
+        }
       }
-
-      sendEmbed = true;
-      eTitle = "You have changed the prefix for the server `"+message.guild.name+"`.";
-      eDescription = "New prefix: `"+serverList.get(message.guild.id, "prefix")+"`\n\
-                      Old prefix: `"+previousPrefix+"`";
       break;
-
+    case "uptime":
+      sendEmbed = true;
+      eTitle = "Uptime";
+      eDescription = "This session of ChigBot has been online for\n```"+msToTime2(client.uptime)+"```";
+      break;
     default:
       sendEmbed = true;
       eTitle = "Invalid Command.";
@@ -403,19 +438,13 @@ client.on('message', async (message) => {
 });
 
 client.on('guildMemberAdd', member => {
-  const channel = member.guild.channels.find(ch => ch.name == "member-log");
-  if (!channel) return;
-  channel.
-  embed = new Discord.RichEmbed()
-    .setTitle('Member Joined')
-    .setAuthor(member.user.tag,member.user.avatarURL)
-    .setColor(0x00b53f)
-    .setDescription("Account created: "+member.user.createdTimestamp)
-    .setFooter("ch [command]")
-    .setTimestamp();
-  channel.send(embed);
+  
 });
 
 client.on('error', console.error);
+
+setInterval(() => {
+  if (clientReady) client.user.setActivity('ch help | '+client.users.size+' users among '+client.guilds.size+' servers.', { type: 'LISTENING' });
+}, 30000);
 
 client.login(secrets.token); 
