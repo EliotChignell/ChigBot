@@ -12,6 +12,7 @@ const nouns = require('./docs/topics/words/nouns.json');
 
 const Discord = require('discord.js');
 const Enmap = require('enmap');
+const DBL = require('dblapi.js');
 const request = require('request');
 const client = new Discord.Client();
 client.points = new Enmap({name:'points'});
@@ -36,16 +37,15 @@ function msToTime2(e){parseInt(e%1e3/100);var n=parseInt(e/1e3%60),r=parseInt(e/
 
 client.once('ready', () => {
     console.log('Ready!');
-    client.user.setActivity(client.users.size+' users among '+client.guilds.size+' servers.', { type: 'LISTENING' });
+    client.user.setActivity('ch help | '+client.users.size+' users among '+client.guilds.size+' servers.', { type: 'LISTENING' });
 });
 
 client.on('message', async (message) => {
   serverList.ensure(message.guild.id, {
     id: message.guild.id,
     prefix: 'ch '
-  })
-  message.guild.members.get('442184461405126656').setNickname('ChigBot | '+serverList.get(message.guild.id,'prefix')+"help");
-
+  });
+  if (message.guild.me.hasPermission('MANAGE_NICKNAMES')) message.guild.me.setNickname('ChigBot | '+serverList.get(message.guild.id,'prefix')+"help");
   if (!message.author.bot) {
     client.points.ensure(message.author.id,{
       id: message.author.id,
@@ -60,8 +60,6 @@ client.on('message', async (message) => {
       lastConfirm: ''
     });
   }
-
-  ;
 
   sendEmbed = false;
   eTitle = '';
@@ -307,8 +305,11 @@ client.on('message', async (message) => {
         console.log(sorted); 
         sendEmbed = false;
         let rDescription = "The Worldwide Top 10:```diff\n";
-        for (const data of sorted) {
-          rDescription += "\n- "+client.users.get(data.id).tag+"\n+ "+data.points+" credits";
+        /*for (const data of sorted) {
+          rDescription += "\n- "+client.users.get(parseInt(data.id)).tag+"\n+ "+data.points+" credits";
+        }*/
+        for (var i=0;i<sorted.length;i++) {
+          rDescription += "\n- "+client.users.get(sorted[i].id).tag+"\n+ "+sorted[i].points+" credits";
         }
         rDescription += '```';
         embed = new Discord.RichEmbed()
