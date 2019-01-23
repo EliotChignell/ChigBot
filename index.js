@@ -29,6 +29,7 @@ let key = '';
 let finalString = '';
 const characters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',' '];
 const oCharacters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',' '];
+const letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
 let shuffledCharacters = [];
 let localInformation = {};
 
@@ -45,9 +46,6 @@ client.once('ready', () => {
 });
 
 client.on('message', async (message) => {
-
-  console.log(message.author.createdAt);
-  console.log(message.author.createdTimestamp);
 
   if (message.guild) {
     serverList.ensure(message.guild.id, {
@@ -419,6 +417,22 @@ client.on('message', async (message) => {
       sendEmbed = true;
       eTitle = "Uptime";
       eDescription = "This session of ChigBot has been online for\n```"+msToTime2(client.uptime)+"```";
+      break;
+
+    case 'hangman':
+      if (!args[0] || args[0] == "start") { // Starting
+        localInformation[message.author.id] = {
+          "inGame": true,
+          "word": nouns.nouns[randInt(0,nouns.nouns.length)].split(''),
+          "attempts": 0,
+          "lettersAttempted": [],
+          "lettersCorrect": [] 
+        }
+        console.log(localInformation[message.author.id]);
+      } else if (args[0].length == 1) {
+        if (!letters.includes(args[0].toLowerCase())) return message.channel.send("Please specify a letter A-Z!");
+        if (!localInformation[message.author.id].word.includes(args[0].toLowerCase()))
+      }
       break;
 
     default:
