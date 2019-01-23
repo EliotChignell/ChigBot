@@ -14,6 +14,7 @@ const Discord = require('discord.js');
 const Enmap = require('enmap');
 const DBL = require('dblapi.js');
 const request = require('request');
+const moment = require('moment');
 const client = new Discord.Client();
 client.points = new Enmap({name:'points'});
 const serverList = new Enmap({name:'servers'});
@@ -29,6 +30,7 @@ let finalString = '';
 const characters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',' '];
 const oCharacters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9',' '];
 let shuffledCharacters = [];
+let localInformation = {};
 
 // Useful functions
 function shuffle(a){let b=a;var j,x,i;for(i=b.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));x=b[i];b[i]=b[j];b[j]=x};return b}
@@ -43,6 +45,10 @@ client.once('ready', () => {
 });
 
 client.on('message', async (message) => {
+
+  console.log(message.author.createdAt);
+  console.log(message.author.createdTimestamp);
+
   if (message.guild) {
     serverList.ensure(message.guild.id, {
       id: message.guild.id,
@@ -121,7 +127,7 @@ client.on('message', async (message) => {
         sendEmbed = true;
         eTitle = "Help";
         eDescription = "Commands available:\n\
-                        ```css\nhelp ping coinflip/coin info encrypt decrypt server balance/bal gamble invite daily weekly leaderboard/board prefix```\n\
+                        ```css\nhelp ping coinflip/coin info encrypt decrypt server balance/bal gamble invite daily weekly leaderboard/board uptime settings```\n\
                         You can also type ch help [command] to see the description and usage of that command.\n\n\
                         *Please be aware that not all the commands listed here will be fully functional.*";
       }
@@ -408,11 +414,13 @@ client.on('message', async (message) => {
         }
       }
       break;
+
     case "uptime":
       sendEmbed = true;
       eTitle = "Uptime";
       eDescription = "This session of ChigBot has been online for\n```"+msToTime2(client.uptime)+"```";
       break;
+
     default:
       sendEmbed = true;
       eTitle = "Invalid Command.";
@@ -437,8 +445,12 @@ client.on('message', async (message) => {
    
 });
 
-client.on('guildMemberAdd', member => {
-  
+client.on('guildMemberAdd', async message => {
+  if (!message.guild.channels.get(serverList.get(message.guild.id, "loggingChannel"))) return;
+  const channel = message.guild.channels.find(c => c.id == serverList.get(message.guild.id, "loggingChannel"));
+  embed = new Discord.RichEmbed()
+    .setTitle("Member Joined")
+    .setAuthor(message.user.tag+" ("+message.user.id+")",message.user.avatarURL);
 });
 
 client.on('error', console.error);
