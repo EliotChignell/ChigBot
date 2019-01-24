@@ -1,4 +1,3 @@
 secrets.json
-node_modules/
-auto.sh
-data/
+/node_modules
+/data
