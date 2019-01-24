@@ -410,6 +410,11 @@ client.on('message', async (message) => {
             message.channel.send("Please provide a valid setting subset! Type `ch settings` to find out your options.");
             break;
         }
+      } else if (!args[0]) {
+        sendEmbed = true;
+        eTitle = "Settings";
+        eDescription = "(ADMIN)`ch settings prefix [prefix]`: changes the prefix of the server.\n\
+                        (ADMIN)`ch settings logging [#channel]`: changes/sets the channel for the bot to log member join/leave notifications.";
       }
       break;
 
