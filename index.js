@@ -125,7 +125,7 @@ client.on('message', async (message) => {
         sendEmbed = true;
         eTitle = "Help";
         eDescription = "Commands available:\n\
-                        ```css\nhelp ping coinflip/coin info encrypt decrypt server balance/bal gamble invite daily weekly leaderboard/board uptime settings```\n\
+                        ```css\nhelp ping coinflip/coin info encrypt decrypt server balance/bal gamble invite daily weekly leaderboard/board uptime settings hangman```\n\
                         You can also type ch help [command] to see the description and usage of that command.\n\n\
                         *Please be aware that not all the commands listed here will be fully functional.*";
       }
@@ -421,17 +421,69 @@ client.on('message', async (message) => {
 
     case 'hangman':
       if (!args[0] || args[0] == "start") { // Starting
+        let randomInteger = randInt(0,nouns.nouns.length);
         localInformation[message.author.id] = {
           "inGame": true,
-          "word": nouns.nouns[randInt(0,nouns.nouns.length)].split(''),
+          "word": nouns.nouns[randomInteger].split(''),
+          "nonDuplicates": nouns.nouns[randomInteger].split('').filter((item, pos, self) => {return self.indexOf(item) == pos}),
           "attempts": 0,
           "lettersAttempted": [],
           "lettersCorrect": [] 
         }
-        console.log(localInformation[message.author.id]);
+        sendEmbed = true;
+        eTitle = "Hangman";
+        localInformation[message.author.id].word.forEach(a => {
+          eDescription += ":white_large_square:";
+        });
+        eDescription += "\n\nGuesses Left: "+(10-(localInformation[message.author.id].attempts))+"\nLetters Wrong: "+localInformation[message.author.id].lettersAttempted;
       } else if (args[0].length == 1) {
         if (!letters.includes(args[0].toLowerCase())) return message.channel.send("Please specify a letter A-Z!");
-        if (!localInformation[message.author.id].word.includes(args[0].toLowerCase()))
+        if (!localInformation[message.author.id]) {
+          return message.channel.send("Please start a game using `ch hangman start`");
+        } else if (!localInformation[message.author.id].inGame) {
+          return message.channel.send("Please start a game using `ch hangman start`");
+        }
+        if (!localInformation[message.author.id].word.includes(args[0].toLowerCase())) { // Wrong
+          localInformation[message.author.id].attempts++;
+          if (localInformation[message.author.id].attempts > 9) { // Lost
+            localInformation[message.author.id].inGame = false;
+            sendEmbed = true;
+            eTitle = "Hangman";
+            eDescription = "You Lost!\nThe word was: "+localInformation[message.author.id].word.join('');
+            break;
+          }
+          localInformation[message.author.id].lettersAttempted.push(args[0].toLowerCase());
+          sendEmbed = true;
+          eTitle = "Hangman";
+          localInformation[message.author.id].word.forEach(e => {
+            if (localInformation[message.author.id].lettersCorrect.includes(e)) {
+              eDescription += ":regional_indicator_"+e+":";
+            } else {
+              eDescription += ":white_large_square:";
+            }
+          });
+          eDescription += "\nYou were wrong!\nGuesses Left: "+(10-(localInformation[message.author.id].attempts))+"\nLetters Wrong: "+localInformation[message.author.id].lettersAttempted;
+        } else if (localInformation[message.author.id].word.includes(args[0].toLowerCase())) { // Correct
+          if (localInformation[message.author.id].nonDuplicates.length == localInformation[message.author.id].lettersCorrect.length) { // Won
+            localInformation[message.author.id].inGame = false;
+            sendEmbed = true;
+            eTitle = "Hangman";
+            eDescription = "You Won!\nThe word was: "+localInformation[message.author.id].word.join('')+"\nTherefore, you recieve "+50*localInformation[message.author.id].word.length+" credits!";
+            client.points.math(message.author.id, "+", 50*localInformation[message.author.id].word.length, "points");
+            break;
+          }
+          localInformation[message.author.id].lettersCorrect.push(args[0].toLowerCase());
+          sendEmbed = true;
+          eTitle = "Hangman";
+          localInformation[message.author.id].word.forEach(e => {
+            if (localInformation[message.author.id].lettersCorrect.includes(e)) {
+              eDescription += ":regional_indicator_"+e+":";
+            } else {
+              eDescription += ":white_large_square:";
+            }
+          });
+          eDescription += "\nYou were right!\nGuesses Left: "+(10-(localInformation[message.author.id].attempts))+"\nLetters Wrong: "+localInformation[message.author.id].lettersAttempted;
+        }
       }
       break;
 
