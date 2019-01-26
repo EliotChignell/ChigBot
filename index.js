@@ -9,6 +9,7 @@
 const secrets = require("./secrets.json");
 const help = require('./docs/help.json');
 const nouns = require('./docs/topics/words/nouns.json');
+const oprah = require('./docs/topics/words/oprah_quotes.json');
 
 const Discord = require('discord.js');
 const Enmap = require('enmap');
@@ -22,6 +23,14 @@ const serverList = new Enmap({name:'servers'});
 var eColor, eTitle, eAuthor, eDescription, eFooter, eImage, eThumbnail, embed, user;
 var clientReady = false;
 var sendEmbed = false;
+
+const shopItems = [
+	{
+	  "name": "Pickaxe",
+	  "id": 1,
+	  "cost": 1000
+	}
+];
 
 // Encryption Variables and Functions
 let input = '';
@@ -490,6 +499,68 @@ client.on('message', async (message) => {
           eDescription += "\nYou were right!\nGuesses Left: "+(10-(localInformation[message.author.id].attempts))+"\nLetters Wrong: "+localInformation[message.author.id].lettersAttempted;
         }
       }
+      break;
+
+    case 'random':
+      if (!args[0]) return message.channel.send("Please specify!");
+      switch (args[0].toLowerCase()) {
+        case 'oprah':
+        case 'quote':
+          message.channel.send(oprah.oprahQuotes[randInt(0,oprah.oprahQuotes.length-1)]+"\n- Oprah Winfrey");
+          break;
+      }
+      break;
+
+    case 'shop':
+    case 'market':
+      if (!args[0]) {
+      	sendEmbed = true;
+      	eTitle = 'ChigBot Market';
+      	eDescription = '**Items**\nPickaxe:  1000 credits';
+      } else if (args[0] == "buy" || args[0] == "get") {
+        if (!args[1]) return message.channel.send('Please specify an item ID or name.');
+        let itemFound = false;
+      	for (const data of shopItems) {
+          if (data.name.toLowerCase() == args[1] || data.id == parseInt(args[1])) {
+            console.log('lolzorfam');
+            if (client.points.get(message.author.id, "points") < parseInt(data.cost)) return message.channel.send("You don't have that much money! "+data.cost+" > "+client.points.get(message.author.id, "points"));
+            client.points.math(message.author.id, "-", parseInt(data.cost), "points");
+            client.points.push(message.author.id, data.id, "items");
+            sendEmbed = true;
+            eTitle = "Market";
+            eDescription = "Successfully bought a `"+data.name+" (ID: "+data.id+")`\nfor `"+data.cost+"` credits.";
+          }
+       	}
+      }
+    break;
+    
+    case 'items':
+    case 'inventory':
+      if (client.points.get(message.author.id, "items").length < 1) return message.channel.send("You don't have any items! Type `ch market` to buy items...");
+      sendEmbed = true;
+      eTitle = message.author.username+"'s Inventory";
+      for (var i in client.points.get(message.author.id, "items")) {
+        eDescription += "`"+shopItems[client.points.get(message.author.id, "items")[i]-1].name+"`";
+      }
+      break;
+
+    case 'mine':
+      let lastMine = client.points.get(message.author.id, "lastMine");
+      let current = new Date().getTime();
+      let currentPoints = client.points.get(message.author.id, "points");
+      if (!client.points.get(message.author.id, "items").includes(1)) return message.channel.send("Please buy a pickaxe using `ch market buy pickaxe`");
+      if (lastMine+600000 >= current) { // Yes
+        let amountMined = Math.floor(currentPoints/50)+randInt(100,100+currentPoints/100);
+        client.points.math(message.author.id, "+", amountMined, "points");
+        sendEmbed = true;
+        eTitle = ":pick: Mining";
+        eDescription = "You mined "+amountMined+" credits!"; 
+      } else {
+        sendEmbed = true;
+        eTitle = ":pick: Mining";
+        eDescription = "You have mined in the last 10 minutes! Please wait: ```"+msToTime((lastMine+600000)-current)+"```";
+      }
+
       break;
 
     default:
