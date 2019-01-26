@@ -549,13 +549,14 @@ client.on('message', async (message) => {
       let current = new Date().getTime();
       let currentPoints = client.points.get(message.author.id, "points");
       if (!client.points.get(message.author.id, "items").includes(1)) return message.channel.send("Please buy a pickaxe using `ch market buy pickaxe`");
-      if (lastMine+600000 >= current) { // Yes
+      if (lastMine+600000 <= current) { // Yes
         let amountMined = Math.floor(currentPoints/50)+randInt(100,100+currentPoints/100);
         client.points.math(message.author.id, "+", amountMined, "points");
+        client.points.set(message.author.id, current, "lastMine");
         sendEmbed = true;
         eTitle = ":pick: Mining";
         eDescription = "You mined "+amountMined+" credits!"; 
-      } else {
+      } else if (lastMine+600000 < current){
         sendEmbed = true;
         eTitle = ":pick: Mining";
         eDescription = "You have mined in the last 10 minutes! Please wait: ```"+msToTime((lastMine+600000)-current)+"```";
