@@ -14,6 +14,7 @@ const oprah = require('./docs/topics/words/oprah_quotes.json');
 const Discord = require('discord.js');
 const Enmap = require('enmap');
 const DBL = require('dblapi.js');
+const myjsonAPI = require('myjson-api');
 const request = require('request');
 const moment = require('moment');
 const client = new Discord.Client();
@@ -31,6 +32,8 @@ const shopItems = [
 	  "cost": 1000
 	}
 ];
+
+myjsonAPI.update('1d204c', require('./docs/help.json'));
 
 // Encryption Variables and Functions
 let input = '';

@@ -78,5 +78,15 @@
         "names": ["Hangman","hangman"],
         "description": "This command lets you play hangman! It selects a random word from a list and you have to guess it. You have 10 attempts to guess it and if you win, you recieve 50x the amount of letters in the word in credits!",
         "usage": "ch hangman start OR ch hangman [letter]"
+    },
+    "market": {
+    	"names": ["Market","market","shop"],
+    	"description": "This command will list all the available items to purchase (with your credits) or with ch market buy, you can get items. ch market sell coming soon.",
+    	"usage": "ch market/shop OR ch market/shop buy [item name/id]"
+    },
+    "mine": {
+    	"names": ["Mine","mine"],
+    	"description": "This command, provided you have bought a pickaxe from the market, allows you to gain a certain amount of credits every 10 minutes.",
+    	"usage": "ch mine"
     }
 }
