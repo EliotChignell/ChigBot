@@ -56,7 +56,7 @@
     },
     "weekly": {
         "names": ["Weekly","weekly"],
-        "description": "This command will be able to give you 100+33% of your credits every week.",
+        "description": "This command will be able to give you 500+33% of your credits every week.",
         "usage": "ch weekly"
     },
     "leaderboard": {
@@ -88,5 +88,15 @@
     	"names": ["Mine","mine"],
     	"description": "This command, provided you have bought a pickaxe from the market, allows you to gain a certain amount of credits every 10 minutes.",
     	"usage": "ch mine"
+    },
+    "vote": {
+        "names": ["Vote","vote"],
+        "description": "This command shows you the link to the bot on discordbots.org and with that you can vote for it and recieve 250+4% of your balance.",
+        "usage": "ch vote"
+    },
+    "reward": {
+        "names": ["Reward","reward"],
+        "description": "This command allows you to collect your reward for voting.",
+        "usage": "ch reward"
     }
 }

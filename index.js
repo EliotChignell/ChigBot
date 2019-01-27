@@ -13,7 +13,7 @@ const oprah = require('./docs/topics/words/oprah_quotes.json');
 
 const Discord = require('discord.js');
 const Enmap = require('enmap');
-const DBL = require('dblapi.js');
+const DiscordBotList = require('dblapi.js');
 const myjsonAPI = require('myjson-api');
 const request = require('request');
 const moment = require('moment');
@@ -21,10 +21,12 @@ const client = new Discord.Client();
 client.points = new Enmap({name:'points'});
 const serverList = new Enmap({name:'servers'});
 
+const dbl = new DiscordBotList(secrets.dbl);
+
 var eColor, eTitle, eAuthor, eDescription, eFooter, eImage, eThumbnail, embed, user;
 var clientReady = false;
 var sendEmbed = false;
-
+const allowedCharacters = ['1','2','3','4','5','6','7','8','9','0','+','-','*','/','(',')',' '];
 const shopItems = [
 	{
 	  "name": "Pickaxe",
@@ -58,6 +60,37 @@ client.once('ready', () => {
 });
 
 client.on('message', async (message) => {
+
+  myjsonAPI.update('1d204c', require('./docs/help.json'));
+
+  if (!client.points.get("rewarded")) client.points.set("rewarded",[]);
+
+  let current;
+
+  var options = {                 
+    method: 'GET',             
+    uri: 'https://discordbots.org/api/bots/442184461405126656/check?userId='+message.author.id,                    
+    headers: {               
+      'Authorization': secrets.dbl                  
+    }
+  };
+
+  if (!message.author.bot) {
+    request(options, (e,r,b) => {
+      if (JSON.parse(b).voted == 1 && !client.points.get("rewarded").includes(message.author.id)) {
+        client.points.math(message.author.id, "+", 250+Math.floor(client.points.get(message.author.id, "points")/25), "points");
+        client.points.push("rewarded", message.author.id);
+        embed = new Discord.RichEmbed()
+          .setTitle('Thanks for voting!')
+          .setAuthor("ChigBot",client.user.displayAvatarURL)
+          .setColor(0xff8300)
+          .setDescription("Make sure to vote every day to get rewards!")
+          .setFooter("ch [command]")
+          .setTimestamp();
+          message.author.send(embed);
+      }
+    });
+  }
 
   if (message.guild) {
     serverList.ensure(message.guild.id, {
@@ -137,7 +170,7 @@ client.on('message', async (message) => {
         sendEmbed = true;
         eTitle = "Help";
         eDescription = "Commands available:\n\
-                        ```css\nhelp ping coinflip/coin info encrypt decrypt server balance/bal gamble invite daily weekly leaderboard/board uptime settings hangman```\n\
+                        ```css\nhelp ping coinflip/coin info encrypt decrypt server balance/bal gamble invite daily weekly leaderboard/board uptime settings hangman market mine vote reward```\n\
                         You can also type ch help [command] to see the description and usage of that command.\n\n\
                         *Please be aware that not all the commands listed here will be fully functional.*";
       }
@@ -298,13 +331,13 @@ client.on('message', async (message) => {
       } else if (lastDaily+86400000 > current) {
         sendEmbed = true;
         eTitle = "Daily Credits";
-        eDescription = "Please wait: "+msToTime((lastDaily+86400000)-current);
+        eDescription = "Please wait: ```"+msToTime((lastDaily+86400000)-current)+"```";
       }
       break;
 
     case 'weekly':
       let lastWeekly = client.points.get(message.author.id,"lastWeekly");
-      creds = Math.floor(client.points.get(message.author.id,'points')/3)+100;
+      creds = Math.floor(client.points.get(message.author.id,'points')/3)+500;
       current = new Date().getTime();
       if (lastWeekly+604800000 <= current) {
         client.points.math(message.author.id, "+", creds,"points");
@@ -313,11 +346,11 @@ client.on('message', async (message) => {
         eTitle = "Weekly Credits";
         eDescription = "**You recieved "+creds+" credits!**\n\
                         Your current balance: "+client.points.get(message.author.id,"points")+" credits.\n\n\
-                        _Every week day you recieve 100+33% of your balance_";
+                        _Every week day you recieve 500+33% of your balance_";
       } else if (lastWeekly+604800000 > current) {
         sendEmbed = true;
         eTitle = "Weekly Credits";
-        eDescription = "Please wait: "+msToTime2((lastWeekly+604800000)-current);
+        eDescription = "Please wait: ```"+msToTime2((lastWeekly+604800000)-current)+"```";
       }
       break;
 
@@ -549,11 +582,11 @@ client.on('message', async (message) => {
 
     case 'mine':
       let lastMine = client.points.get(message.author.id, "lastMine");
-      let current = new Date().getTime();
+      current = new Date().getTime();
       let currentPoints = client.points.get(message.author.id, "points");
       if (!client.points.get(message.author.id, "items").includes(1)) return message.channel.send("Please buy a pickaxe using `ch market buy pickaxe`");
       if (lastMine+600000 <= current) { // Yes
-        let amountMined = Math.floor(currentPoints/50)+randInt(100,100+currentPoints/100);
+        let amountMined = randInt(10,10+(currentPoints/20));
         client.points.math(message.author.id, "+", amountMined, "points");
         client.points.set(message.author.id, current, "lastMine");
         sendEmbed = true;
@@ -565,6 +598,26 @@ client.on('message', async (message) => {
         eDescription = "You have mined in the last 10 minutes! Please wait: ```"+msToTime((lastMine+600000)-current)+"```";
       }
 
+      break;
+
+    case 'math':
+      if (!args[0]) return message.channel.send('Please specify a problem! e.g. `100/25+14`');
+      let problem = args.join('').split('');
+      for (var i in problem) {
+      	if (!allowedCharacters.includes(problem[i])) return message.channel.send("Please use the appropiate characters: ```"+allowedCharacters+"```");
+      }
+      sendEmbed = true;
+      eTitle = "Math function";
+      eDescription = "Your answer: ```"+eval(problem.join(''))+"```";
+      break;
+
+    case 'reward':
+      break;
+
+    case 'vote':
+      sendEmbed = true;
+      eTitle = "Daily voting";
+      eDescription = "https://discordbots.org/bot/442184461405126656\nYou can get rewards for voting once every day!\nAfter voting, type `ch reward` to get your voting reward.";
       break;
 
     default:
