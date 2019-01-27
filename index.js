@@ -65,6 +65,8 @@ client.on('message', async (message) => {
 
   if (!client.points.get("rewarded")) client.points.set("rewarded",[]);
 
+  dbl.postStats(client.guilds.size);
+
   let current;
 
   var options = {                 
