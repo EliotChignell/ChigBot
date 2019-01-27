@@ -516,6 +516,7 @@ client.on('message', async (message) => {
           });
           eDescription += "\nYou were wrong!\nGuesses Left: "+(10-(localInformation[message.author.id].attempts))+"\nLetters Wrong: "+localInformation[message.author.id].lettersAttempted;
         } else if (localInformation[message.author.id].word.includes(args[0].toLowerCase())) { // Correct
+          localInformation[message.author.id].lettersCorrect.push(args[0].toLowerCase());
           if (localInformation[message.author.id].nonDuplicates.length == localInformation[message.author.id].lettersCorrect.length) { // Won
             localInformation[message.author.id].inGame = false;
             sendEmbed = true;
@@ -524,7 +525,6 @@ client.on('message', async (message) => {
             client.points.math(message.author.id, "+", 50*localInformation[message.author.id].word.length, "points");
             break;
           }
-          localInformation[message.author.id].lettersCorrect.push(args[0].toLowerCase());
           sendEmbed = true;
           eTitle = "Hangman";
           localInformation[message.author.id].word.forEach(e => {
